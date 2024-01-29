@@ -1,47 +1,32 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
 const app = express();
-app.use(cors());
-
-app.use(express.static(path.join(__dirname, 'miniNode')));
-const port = 3000;
+const sdk = require('api')('@render-api/v1.0#jw0325lr5hblce');
+    
+const port = process.env.PORT || 8000;
 //API Key
 //rnd_whG9BF6E05evkbFjts1JAtCOMAgr
 
-
-// app.get('/', (req, res) => {
-//     
-//   });
-
-// Define the endpoint to fetch installed applications
-app.get('/deployedApps', async (req, res) => {
-    try {
-        // TODO: Fetch and return the list of installed apps from Render API
-        const deployedApps = await fetchInstalledApps();
-        res.json(deployedApps);
-    } catch (error) {
-        console.log("oppppppppppps!!");
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+app.get("/", (req, res) => {
+    sdk.auth('rnd_whG9BF6E05evkbFjts1JAtCOMAgr');;
+    sdk.getServices({ limit: '20' })
+        .then(({ data }) => {
+            console.log(data);
+            res.json(data);
+        })
+        .catch(err => console.error(err));
 });
 
-// Function to fetch installed apps from Render API
-async function fetchInstalledApps() {
-    const sdk = require('api')('@render-api/v1.0#jw0325lr5hblce');
+app.get("/names", (req, res) => {
     sdk.auth('rnd_whG9BF6E05evkbFjts1JAtCOMAgr');
-    try {
-        const response = await sdk.getServices({ limit: '20' });
-        const data = response.data;
-        //res.sendFile(path.join(__dirname, 'miniNode', 'index.html'));
-        console.log(data);
-        return true;
-    } catch (error) {
-        console.error(error);
-        return false;
-    }
-}
+    sdk.getServices({ limit: '20' })
+        .then(({ data }) => {
+            console.log(data.map(e => e.service.name));
+            res.json(data.map(e => e.service.name));
+        })
+        .catch(err => console.error(err));
+});
+
 
 // Start the Express app
 app.listen(port, () => {
